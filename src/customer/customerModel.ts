@@ -11,6 +11,9 @@ const AddressSchema = new mongoose.Schema<Address>({
         required: false,
         default: false
     }
+}, {
+    _id: false,
+    strict: true
 })
 
 const CustomerSchema = new mongoose.Schema<Customer>({
