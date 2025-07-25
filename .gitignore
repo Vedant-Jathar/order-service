@@ -131,3 +131,4 @@ dist
 
 # The folder containing the yaml files which have the env variables
 /config
+/config/*.yaml
