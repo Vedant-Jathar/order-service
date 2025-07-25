@@ -22,4 +22,5 @@ export class CustomerController {
         const customer = await this.customerService.addAddress(userId, customerId, address)
         res.json(customer)
     }
+    
 }
