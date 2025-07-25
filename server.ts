@@ -5,7 +5,6 @@ import connectDB from "./src/config/db";
 
 const startServer = async () => {
   const PORT = config.get("server.port") || 5503;
-  console.log("hikmkm");
 
   try {
     await connectDB();

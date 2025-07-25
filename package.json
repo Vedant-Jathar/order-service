@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon server.ts",
+    "dev": "cross-env NODE_ENV=development nodemon server.ts",
     "build": "npm run lint && tsc",
     "lint": "eslint .",
     "format": "prettier . --write"
@@ -13,8 +13,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "config": "^3.3.11",
+    "config": "^3.3.9",
     "cookie-parser": "^1.4.6",
+    "cross-env": "^7.0.3",
     "express": "^4.19.2",
     "express-jwt": "^8.4.1",
     "http-errors": "^2.0.0",
