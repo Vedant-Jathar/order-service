@@ -38,6 +38,6 @@ const CustomerSchema = new mongoose.Schema<Customer>({
         required: false,
         default: []
     }
-})
+}, { timestamps: true })
 
 export default mongoose.model("Customer", CustomerSchema)
