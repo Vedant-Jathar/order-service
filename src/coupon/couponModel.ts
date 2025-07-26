@@ -23,4 +23,7 @@ const CouponSchema = new mongoose.Schema({
     },
 }, { timestamps: true })
 
+
+CouponSchema.index({ tenantId: 1, code: 1 }, { unique: true })
+
 export default mongoose.model("Coupon", CouponSchema)

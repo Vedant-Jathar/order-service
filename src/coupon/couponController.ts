@@ -3,6 +3,7 @@ import { Request } from "express-jwt";
 import createHttpError from "http-errors";
 import { CouponService } from "./couponService";
 import { Coupon } from "./couponTypes";
+import CouponModel from "./couponModel";
 
 export class CouponController {
     constructor(private couponService: CouponService) {
@@ -19,6 +20,26 @@ export class CouponController {
         const coupon = await this.couponService.createCoupon({ title, code, discount, validUpto, tenantId })
 
         res.json(coupon)
+    }
+
+    verify = async (req: Request, res: Response, next: NextFunction) => {
+
+        const { code, tenantId } = req.body
+        const coupon: Coupon = await CouponModel.findOne({ code, tenantId })
+
+        if (!coupon) {
+            throw createHttpError(400, "Invalid coupon")
+        }
+
+        const currentDate = new Date()
+        const couponExpiryDate = new Date(coupon.validUpto)
+
+        if (currentDate >= couponExpiryDate) {
+            return res.json({ valid: false, discount: 0 })
+        }
+
+        return res.json({ valid: true, discount: coupon.discount })
+
     }
 
     update = async (req: Request, res: Response, next: NextFunction) => {
