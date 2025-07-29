@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { cachedProduct, cachedTopping, CartItem } from "../types";
 import productCacheModel from "../productCache/productCacheModel";
 import toppingCacheModel from "../toppingCache/toppingCacheModel";
+import couponModel from "../coupon/couponModel";
 
 export class OrderController {
     constructor() {
@@ -10,10 +11,22 @@ export class OrderController {
     create = async (req: Request, res: Response) => {
         console.log("Hello");
 
-        const { cart } = req.body
+        const { cart, couponCode, tenantId } = req.body
         const subTotal = await this.calculateTotal(cart)
 
-        res.json({ subTotal })
+        let discountPercentage = 0
+
+        if (couponCode) {
+            console.log("couponCode", couponCode);
+
+            discountPercentage = await this.getDiscountPercentage(couponCode, tenantId)
+            console.log("discountPercentage", discountPercentage);
+
+        }
+
+        const discountAmount = (subTotal * discountPercentage) / 100
+
+        res.json({ discountAmount })
 
     }
 
@@ -55,7 +68,7 @@ export class OrderController {
 
         const toppingsTotal = curr.chosenConfig.selectedToppings.reduce((acc, curr) => {
             const toppingPrice = toppingPricings.find((topping) => topping.toppingId === curr._id)
-          
+
             return acc + toppingPrice.price
         }, 0)
 
@@ -67,6 +80,30 @@ export class OrderController {
         })
 
         return toppingsTotal + productConfigTotal
+    }
+
+    private getDiscountPercentage = async (couponCode: string, tenantId: string) => {
+        const CouponCode = await couponModel.findOne({
+            code: couponCode, tenantId
+        })
+
+        console.log("Coupon foind", CouponCode);
+
+        if (!CouponCode) {
+            return 0
+        }
+
+        const currentDate = new Date()
+        const couponExpirydate = new Date(CouponCode.validUpto)
+        console.log("currentDate", currentDate);
+        console.log("couponExpirydate", couponExpirydate);
+
+
+        if (currentDate <= couponExpirydate) {
+            return CouponCode.discount
+        }
+
+        return 0
     }
 
 }
