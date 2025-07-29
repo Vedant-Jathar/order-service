@@ -8,13 +8,13 @@ export const handleProductCreateUpdate = async (value: string) => {
     } catch (error) {
         console.log("Error parsing the product message");
     }
-    
     await productCacheModel.updateOne(
         {
-            _id: product._id
+            productId: product._id
         },
         {
             $set: {
+                productId: product._id,
                 priceConfiguration: product.priceConfiguration
             }
         },

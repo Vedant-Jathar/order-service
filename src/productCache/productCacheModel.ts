@@ -25,11 +25,13 @@ import mongoose from "mongoose";
 const pricingSchema = new mongoose.Schema({
     priceType: {
         type: String,
+        required: true,
         enum: ["base", "additional"]
     },
     availableOptions: {
         type: Map,
         of: Number,
+        required: true
     }
 })
 
@@ -43,6 +45,6 @@ const productCacheSchema = new mongoose.Schema({
         of: pricingSchema,
         required: true
     }
-})
+}, { timestamps: true })
 
 export default mongoose.model("productCacheSchema", productCacheSchema, "productsCache")

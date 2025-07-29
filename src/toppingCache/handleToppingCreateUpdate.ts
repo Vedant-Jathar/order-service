@@ -8,13 +8,14 @@ export const handleToppingCreateUpdate = async (value: string) => {
     } catch (error) {
         console.log("Error in parsing topping message");
     }
-    
+
     await toppingCacheModel.updateOne(
         {
-            _id: topping._id
+            toppingId: topping._id
         },
         {
             $set: {
+                toppingId: topping._id,
                 price: topping.price,
                 tenantId: topping.tenantId
             }

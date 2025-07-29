@@ -3,6 +3,7 @@ import { globalErrorHandler } from "./common/middleware/globalErrorHandler";
 import cookieParser from "cookie-parser";
 import customerRoutes from "./customer/customerRoutes"
 import couponRoutes from "./coupon/couponRoutes"
+import orderRoutes from "./order/orderRoutes"
 import cors from "cors"
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }))
 
 app.use("/customer", customerRoutes)
 app.use("/coupons", couponRoutes)
+app.use("/orders", orderRoutes)
 
 app.use(globalErrorHandler);
 
