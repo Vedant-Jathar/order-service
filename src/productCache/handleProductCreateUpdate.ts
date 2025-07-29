@@ -6,8 +6,9 @@ export const handleProductCreateUpdate = async (value: string) => {
     try {
         product = JSON.parse(value)
     } catch (error) {
-        console.log("Error parsing the product");
+        console.log("Error parsing the product message");
     }
+    
     await productCacheModel.updateOne(
         {
             _id: product._id

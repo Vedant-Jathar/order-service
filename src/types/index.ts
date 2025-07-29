@@ -22,3 +22,9 @@ export interface ProductMessage {
     }
   }
 }
+
+export interface ToppingMessage {
+  _id: string,
+  price: number,
+  tenantId: number
+}
