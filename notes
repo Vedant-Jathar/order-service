@@ -1,6 +1,5 @@
 ************************************************************************************
 //To clone a github repo
-
 First clone it using the command
 => git clone ...url.... ...foldername...
 (you will get the url from the github repo,"code" option will be there)
@@ -21,11 +20,17 @@ Then create your github repo on github and then add your own git repo by:
 ************************************************************************************
 //To connect to a mongodb database first we need to run a container of mongo on docker by the following command:
 
-1) docker run -d --name mongo -p 27018:27017 -e MONGO_INITDB_ROOT_USERNAME=admintwo -e MONGO_INITDB_ROOT_PASSWORD=secret123 mongo
+1) docker run -d --name mongoDb_Name -p 27018:27017 -e MONGO_INITDB_ROOT_USERNAME=admintwo -e MONGO_INITDB_ROOT_PASSWORD=secret123 mongo
 (The local host port should be changed if it is already in use)
 
 2) Then in the "env" there should be a database url which will be in mongoose.connect(databaseUrl)
 
-databaseUrl:mongodb://admintwo:secret123@localhost:27018/order?authSource=admin&w=1
-(order needs to be made in the mongodb compass)
+databaseUrl : mongodb://admintwo:secret123@localhost:27018/order?authSource=admin&w=1
+("order" database needs to be made in the mongodb compass)
 ************************************************************************************
+=> Run docker compose commands in "Command prompt":
+
+//This has to be run to get the details of the conatianer(In Commnad prompt)
+docker exec -it brokers-kafka-1 bash
+
+//Then got to "/opt/bitnami/kafka/bin" and then run the commands of create topic,list topics,add partitions etc
