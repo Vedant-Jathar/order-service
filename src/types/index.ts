@@ -12,3 +12,13 @@ export interface AuthRequest extends Request {
     tenant: string;
   };
 }
+
+export interface ProductMessage {
+  _id: string,
+  priceConfiguration: {
+    priceType: "base" | "additional",
+    availableOptions: {
+      [key: string]: number
+    }
+  }
+}
