@@ -26,7 +26,12 @@ export class OrderController {
 
         const discountAmount = (subTotal * discountPercentage) / 100
 
-        res.json({ discountAmount })
+        const priceAfterDiscount = subTotal - discountAmount
+        const TAXES_PERCENTAGE = 18
+
+        const taxesAmount = Math.round((priceAfterDiscount * TAXES_PERCENTAGE) / 100)
+
+        res.json({ taxesAmount })
 
     }
 
@@ -87,7 +92,7 @@ export class OrderController {
             code: couponCode, tenantId
         })
 
-        console.log("Coupon foind", CouponCode);
+        console.log("Coupon found", CouponCode);
 
         if (!CouponCode) {
             return 0
