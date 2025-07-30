@@ -4,6 +4,7 @@ import productCacheModel from "../productCache/productCacheModel";
 import toppingCacheModel from "../toppingCache/toppingCacheModel";
 import couponModel from "../coupon/couponModel";
 import orderModel from "./orderModel";
+import idempotencyModel from "../idempotency/idempotencyModel";
 
 export class OrderController {
     constructor() {
@@ -37,6 +38,16 @@ export class OrderController {
 
         // Calculate Grand total:
         const grandTotal = priceAfterDiscount + taxesAmount + DELIVERY_CHARGES
+
+        const idempotencyKey = req.headers["idempotency-key"]
+
+        const idempotency = await idempotencyModel.findOne({ key: idempotencyKey })
+
+        // if (!idempotency) {
+
+        // }
+
+        return res.json({ idempotencyKey })
 
         // Create order:
         const order = await orderModel.create({
