@@ -3,39 +3,56 @@ import { cachedProduct, cachedTopping, CartItem } from "../types";
 import productCacheModel from "../productCache/productCacheModel";
 import toppingCacheModel from "../toppingCache/toppingCacheModel";
 import couponModel from "../coupon/couponModel";
+import orderModel from "./orderModel";
 
 export class OrderController {
     constructor() {
     }
 
     create = async (req: Request, res: Response) => {
-        console.log("Hello");
 
-        const { cart, couponCode, tenantId } = req.body
+        // Receive this data from the customer:
+        const { cart, customerId, couponCode, tenantId, address, comment, paymentMode } = req.body
+
+        // Calculate subtotal:
         const subTotal = await this.calculateTotal(cart)
 
+        // Calculate discount:
         let discountPercentage = 0
 
         if (couponCode) {
-            console.log("couponCode", couponCode);
-
             discountPercentage = await this.getDiscountPercentage(couponCode, tenantId)
-            console.log("discountPercentage", discountPercentage);
-
         }
 
         const discountAmount = Math.round((subTotal * discountPercentage) / 100)
 
+        // Calculate taxes:
         const priceAfterDiscount = subTotal - discountAmount
         const TAXES_PERCENTAGE = 18
 
         const taxesAmount = Math.round((priceAfterDiscount * TAXES_PERCENTAGE) / 100)
 
+        // Calculate Delivery Charges:
         const DELIVERY_CHARGES = subTotal <= 200 ? 50 : 0
 
+        // Calculate Grand total:
         const grandTotal = priceAfterDiscount + taxesAmount + DELIVERY_CHARGES
 
-        res.json({ grandTotal })
+        // Create order:
+        const order = await orderModel.create({
+            cart,
+            tenantId,
+            customerId,
+            address,
+            comment,
+            total: grandTotal,
+            discount: discountAmount,
+            taxes: taxesAmount,
+            deliveryCharges: DELIVERY_CHARGES,
+            paymentMode,
+        })
+
+        res.json(order)
 
     }
 
