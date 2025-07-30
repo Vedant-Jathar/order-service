@@ -1,16 +1,18 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { cachedProduct, cachedTopping, CartItem } from "../types";
 import productCacheModel from "../productCache/productCacheModel";
 import toppingCacheModel from "../toppingCache/toppingCacheModel";
 import couponModel from "../coupon/couponModel";
 import orderModel from "./orderModel";
 import idempotencyModel from "../idempotency/idempotencyModel";
+import mongoose from "mongoose";
+import createHttpError from "http-errors";
 
 export class OrderController {
     constructor() {
     }
 
-    create = async (req: Request, res: Response) => {
+    create = async (req: Request, res: Response, next: NextFunction) => {
 
         // Receive this data from the customer:
         const { cart, customerId, couponCode, tenantId, address, comment, paymentMode } = req.body
@@ -43,27 +45,42 @@ export class OrderController {
 
         const idempotency = await idempotencyModel.findOne({ key: idempotencyKey })
 
-        // if (!idempotency) {
+        let newOrder = idempotency ? [idempotency.response] : []
 
-        // }
+        if (!idempotency) {
+            const session = await mongoose.startSession()
+            await session.startTransaction()
+            try {
+                // Create order:
+                newOrder = await orderModel.create([{
+                    cart,
+                    tenantId,
+                    customerId,
+                    address,
+                    comment,
+                    total: grandTotal,
+                    discount: discountAmount,
+                    taxes: taxesAmount,
+                    deliveryCharges: DELIVERY_CHARGES,
+                    paymentMode,
+                }], { session })
 
-        return res.json({ idempotencyKey })
+                
+                // Create key:
+                await idempotencyModel.create([{ key: idempotencyKey, response: newOrder[0] }], { session })
 
-        // Create order:
-        const order = await orderModel.create({
-            cart,
-            tenantId,
-            customerId,
-            address,
-            comment,
-            total: grandTotal,
-            discount: discountAmount,
-            taxes: taxesAmount,
-            deliveryCharges: DELIVERY_CHARGES,
-            paymentMode,
-        })
+                await session.commitTransaction()
+            } catch (error) {
+                await session.abortTransaction()
+                await session.endSession()
 
-        res.json(order)
+                return next(createHttpError(500, "Error in order transaction"))
+            } finally {
+                await session.endSession()
+            }
+        }
+
+        res.json({ newOrder })
 
     }
 
