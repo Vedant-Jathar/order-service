@@ -24,14 +24,18 @@ export class OrderController {
 
         }
 
-        const discountAmount = (subTotal * discountPercentage) / 100
+        const discountAmount = Math.round((subTotal * discountPercentage) / 100)
 
         const priceAfterDiscount = subTotal - discountAmount
         const TAXES_PERCENTAGE = 18
 
         const taxesAmount = Math.round((priceAfterDiscount * TAXES_PERCENTAGE) / 100)
 
-        res.json({ taxesAmount })
+        const DELIVERY_CHARGES = subTotal <= 200 ? 50 : 0
+
+        const grandTotal = priceAfterDiscount + taxesAmount + DELIVERY_CHARGES
+
+        res.json({ grandTotal })
 
     }
 
