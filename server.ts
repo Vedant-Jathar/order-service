@@ -15,7 +15,10 @@ const startServer = async () => {
 
     // Creating the consumer and reading the messages from the broker:
     messagebroker = createMessageBroker()
+    await messagebroker.connectProducer()
+    logger.info("Connected to the producer")
     await messagebroker.connectConsumer()
+    logger.info("Connected to the consumer")
     await messagebroker.consumeMessage(["product", "topping"], false)
 
     app

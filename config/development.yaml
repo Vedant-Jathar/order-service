@@ -4,6 +4,11 @@ server:
 auth:
   JWKS_URI: http://localhost:5501/well-known/jwks.json
 database:
-  url: mongodb://admintwo:secret123@localhost:27018/order?authSource=admin&w=1
-kafka: 
-    broker: localhost:9092
+  url: mongodb+srv://vedant:vedant123@cluster0.mkzlnzg.mongodb.net/order?retryWrites=true&w=majority&appName=Cluster0
+kafka:
+  broker: localhost:9092
+razorPay:
+  id: rzp_test_rPk76iyU7IhOOC
+  secret: 86hxsT54F5deCImSj3Sz9BJE
+webhook:
+  secret: 47ia@dWW3fZpG4Z

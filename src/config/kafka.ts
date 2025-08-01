@@ -1,4 +1,4 @@
-import { Consumer, EachMessagePayload, Kafka } from "kafkajs";
+import { Consumer, EachMessagePayload, Kafka, Producer } from "kafkajs";
 import { MessageBroker } from "../types/broker";
 import { handleProductCreateUpdate } from "../productCache/handleProductCreateUpdate";
 import { handleToppingCreateUpdate } from "../toppingCache/handleToppingCreateUpdate";
@@ -6,18 +6,35 @@ import { handleToppingCreateUpdate } from "../toppingCache/handleToppingCreateUp
 export class KafkaMessageBroker implements MessageBroker {
 
     private consumer: Consumer
+    private producer: Producer
 
     constructor(clientId: string, brokers: string[]) {
         const kafka = new Kafka({ clientId, brokers })
+        this.producer = kafka.producer()
         this.consumer = kafka.consumer({ groupId: clientId })
+    }
+
+    connectProducer = async () => {
+        await this.producer.connect()
     }
 
     connectConsumer = async () => {
         await this.consumer.connect()
     }
 
+    disconnectProducer = async () => {
+        await this.producer.disconnect()
+    }
+
     disconnectConsumer = async () => {
         await this.consumer.disconnect()
+    }
+
+    sendMessage = async (topic: string, message: string) => {
+        await this.producer.send({
+            topic,
+            messages: [{ value: message }]
+        })
     }
 
     consumeMessage = async (topics: string[], fromBeginning: boolean = false) => {

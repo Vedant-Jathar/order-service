@@ -7,15 +7,21 @@ import orderModel from "./orderModel";
 import idempotencyModel from "../idempotency/idempotencyModel";
 import mongoose from "mongoose";
 import createHttpError from "http-errors";
+import { razorpay } from "../payment/paymentUtil";
+import customerModel from "../customer/customerModel";
+import { PaymentMode } from "./orderTypes";
+import { MessageBroker } from "../types/broker";
 
 export class OrderController {
-    constructor() {
+    constructor(private broker: MessageBroker) {
     }
 
     create = async (req: Request, res: Response, next: NextFunction) => {
 
         // Receive this data from the customer:
         const { cart, customerId, couponCode, tenantId, address, comment, paymentMode } = req.body
+
+        const customer = await customerModel.findOne({ _id: customerId })
 
         // Calculate subtotal:
         const subTotal = await this.calculateTotal(cart)
@@ -46,6 +52,7 @@ export class OrderController {
         const idempotency = await idempotencyModel.findOne({ key: idempotencyKey })
 
         let newOrder = idempotency ? [idempotency.response] : []
+        let paymentUrl = null
 
         if (!idempotency) {
             const session = await mongoose.startSession()
@@ -65,22 +72,51 @@ export class OrderController {
                     paymentMode,
                 }], { session })
 
-                
-                // Create key:
-                await idempotencyModel.create([{ key: idempotencyKey, response: newOrder[0] }], { session })
+                const order = newOrder[0]
+
+                if (paymentMode === PaymentMode.CARD) {
+                    const paymentLink = await razorpay.paymentLink.create({
+                        amount: 100,
+                        currency: "INR",
+                        accept_partial: false,
+                        reference_id: order._id.toString(),
+                        description: "Payment for pizza order",
+                        customer: {
+                            name: `${customer.firstName} ${customer.lastName}`,
+                            email: customer.email,
+                        },
+                        notify: {
+                            sms: true,
+                            email: true,
+                        },
+                        callback_url: `http://localhost:3000/payment?orderId=${order._id.toString()}`,
+                        callback_method: "get",
+                        notes: {
+                            orderId: order._id.toString(),
+                            tenantId
+                        }
+                    });
+                    order.paymentId = paymentLink.id
+                    await order.save({ session })
+                    paymentUrl = paymentLink.short_url
+                }
+
+                // Create idempotency key:
+                await idempotencyModel.create([{ key: idempotencyKey, response: order }], { session })
 
                 await session.commitTransaction()
+                await this.broker.sendMessage("order", JSON.stringify(order))
             } catch (error) {
+                console.log("error", error);
                 await session.abortTransaction()
                 await session.endSession()
-
                 return next(createHttpError(500, "Error in order transaction"))
             } finally {
                 await session.endSession()
             }
         }
 
-        res.json({ newOrder })
+        res.json({ paymentUrl })
 
     }
 

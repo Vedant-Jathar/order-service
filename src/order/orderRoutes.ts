@@ -3,10 +3,14 @@ import authenticate from "../common/middleware/authenticate";
 import { asyncWrapper } from "../utils";
 import { OrderController } from "./orderController";
 import { createOrderValidator } from "./orderValidator";
+import { createMessageBroker } from "../common/middleware/fatories/brokerFactory";
 
 const router = Router()
 
-const orderController = new OrderController()
+const broker = createMessageBroker()
+
+
+const orderController = new OrderController(broker)
 
 router.post("/", authenticate, createOrderValidator, asyncWrapper(orderController.create))
 
