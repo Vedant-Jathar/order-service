@@ -196,7 +196,7 @@ export class OrderController {
 
         res.json(order)
     }
-
+    
     private calculateTotal = async (cart: CartItem[]) => {
         // Storing the ids of the products in the cart
         const productIds = cart.map(cartItem => cartItem.product._id)
