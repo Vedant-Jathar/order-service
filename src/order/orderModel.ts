@@ -183,7 +183,7 @@ const orderSchema = new mongoose.Schema<Order>({
         required: false,
         default: null
     }
-})
+}, { timestamps: true })
 
 
 export default mongoose.model("order", orderSchema)
