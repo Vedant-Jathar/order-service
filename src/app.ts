@@ -22,6 +22,7 @@ app.use("/customer", customerRoutes)
 app.use("/coupons", couponRoutes)
 app.use("/orders", orderRoutes)
 app.use("/payments", paymentRoutes)
+
 app.use(globalErrorHandler);
 
 export default app;

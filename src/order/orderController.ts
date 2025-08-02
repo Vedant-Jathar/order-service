@@ -12,15 +12,20 @@ import customerModel from "../customer/customerModel";
 import { Order, PaymentMode } from "./orderTypes";
 import { MessageBroker } from "../types/broker";
 import { Request } from "express-jwt";
+import { Customer } from "../customer/customerTypes";
 
 export class OrderController {
     constructor(private broker: MessageBroker) {
     }
 
     create = async (req: Request, res: Response, next: NextFunction) => {
-
         // Receive this data from the customer:
         const { cart, customerId, couponCode, tenantId, address, comment, paymentMode } = req.body
+
+        if (!tenantId) {
+            alert("Pls select restauarnt")
+            return
+        }
 
         const customer = await customerModel.findOne({ _id: customerId })
 
@@ -123,7 +128,6 @@ export class OrderController {
     }
 
     getMineOrders = async (req: Request, res: Response, next: NextFunction) => {
-
         // Get the user id from the "req.auth" which was set in the authenticate middleware:
         const userId = req.auth.sub
         if (!userId) {
@@ -143,6 +147,34 @@ export class OrderController {
         )
 
         res.json(orders)
+    }
+
+    getSingleOrder = async (req: Request, res: Response, next: NextFunction) => {
+        const { id: orderId } = req.params
+        const { sub: userId, role, tenantId } = req.auth
+        const order: Order = await orderModel.findOne({ _id: orderId })
+
+        if (!order) {
+            return next(createHttpError(404, "Order not found"))
+        }
+
+        if (role === "manager") {
+            if (order.tenantId !== tenantId) {
+                return next(createHttpError(403, "Forbidden error-You are a manager of diff tenant"))
+            }
+        }
+
+        if (role === "customer") {
+            const customer: Customer = await customerModel.findOne({ _id: order.customerId })
+            if (!customer) {
+                return next(createHttpError(404, "Customer not found"))
+            }
+            if (customer.userId !== userId) {
+                return next(createHttpError(404, "Forbidden error-This order doesnt belom=ng to you"))
+            }
+        }
+
+        res.json(order)
     }
 
     private calculateTotal = async (cart: CartItem[]) => {

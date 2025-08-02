@@ -14,5 +14,6 @@ const orderController = new OrderController(broker)
 
 router.post("/", authenticate, createOrderValidator, asyncWrapper(orderController.create))
 router.get("/mine", authenticate, asyncWrapper(orderController.getMineOrders))
+router.get("/:id", authenticate, asyncWrapper(orderController.getSingleOrder))
 
 export default router
