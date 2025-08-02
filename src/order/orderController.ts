@@ -152,7 +152,22 @@ export class OrderController {
     getSingleOrder = async (req: Request, res: Response, next: NextFunction) => {
         const { id: orderId } = req.params
         const { sub: userId, role, tenantId } = req.auth
-        const order: Order = await orderModel.findOne({ _id: orderId })
+        const { fields } = req.query as { fields: string }
+
+        let projection = {}
+
+        // If fields are sent then only those fields will be sent in the response.
+        if (fields) {
+            const fieldsArray = fields.split(",")
+            projection = fieldsArray.reduce((acc, curr) => {
+                return {
+                    ...acc,
+                    [curr]: 1
+                }
+            }, {})
+        }
+
+        let order: Order = await orderModel.findOne({ _id: orderId })
 
         if (!order) {
             return next(createHttpError(404, "Order not found"))
@@ -170,8 +185,13 @@ export class OrderController {
                 return next(createHttpError(404, "Customer not found"))
             }
             if (customer.userId !== userId) {
-                return next(createHttpError(404, "Forbidden error-This order doesnt belom=ng to you"))
+                return next(createHttpError(403, "Forbidden error - This order doesn't belong to you"))
             }
+        }
+
+        if (fields) {
+            order = await orderModel.findOne({ _id: orderId }, projection)
+            return res.json(order)
         }
 
         res.json(order)
