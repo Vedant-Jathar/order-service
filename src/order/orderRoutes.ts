@@ -13,5 +13,6 @@ const broker = createMessageBroker()
 const orderController = new OrderController(broker)
 
 router.post("/", authenticate, createOrderValidator, asyncWrapper(orderController.create))
+router.get("/mine", authenticate, asyncWrapper(orderController.getMineOrders))
 
 export default router

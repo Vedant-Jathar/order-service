@@ -2,9 +2,13 @@ import { ProductMessage } from "../types";
 import productCacheModel from "./productCacheModel"
 
 export const handleProductCreateUpdate = async (value: string) => {
+    console.log("Product creation started");
+
     let product: ProductMessage
     try {
         product = JSON.parse(value)
+        console.log("Product", product);
+
     } catch (error) {
         console.log("Error parsing the product message");
     }
@@ -21,4 +25,6 @@ export const handleProductCreateUpdate = async (value: string) => {
         {
             upsert: true
         })
+    console.log("Product creation enende");
+
 }

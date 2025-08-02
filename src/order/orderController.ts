@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
 import { cachedProduct, cachedTopping, CartItem } from "../types";
 import productCacheModel from "../productCache/productCacheModel";
 import toppingCacheModel from "../toppingCache/toppingCacheModel";
@@ -9,8 +9,9 @@ import mongoose from "mongoose";
 import createHttpError from "http-errors";
 import { razorpay } from "../payment/paymentUtil";
 import customerModel from "../customer/customerModel";
-import { PaymentMode } from "./orderTypes";
+import { Order, PaymentMode } from "./orderTypes";
 import { MessageBroker } from "../types/broker";
+import { Request } from "express-jwt";
 
 export class OrderController {
     constructor(private broker: MessageBroker) {
@@ -57,6 +58,7 @@ export class OrderController {
         if (!idempotency) {
             const session = await mongoose.startSession()
             await session.startTransaction()
+
             try {
                 // Create order:
                 newOrder = await orderModel.create([{
@@ -76,7 +78,7 @@ export class OrderController {
 
                 if (paymentMode === PaymentMode.CARD) {
                     const paymentLink = await razorpay.paymentLink.create({
-                        amount: 100,
+                        amount: grandTotal * 100,
                         currency: "INR",
                         accept_partial: false,
                         reference_id: order._id.toString(),
@@ -89,7 +91,7 @@ export class OrderController {
                             sms: true,
                             email: true,
                         },
-                        callback_url: `http://localhost:3000/payment?orderId=${order._id.toString()}`,
+                        callback_url: `http://localhost:3000/payment?orderId=${order._id.toString()}&restaurant=${tenantId}`,
                         callback_method: "get",
                         notes: {
                             orderId: order._id.toString(),
@@ -106,6 +108,7 @@ export class OrderController {
 
                 await session.commitTransaction()
                 await this.broker.sendMessage("order", JSON.stringify(order))
+                res.json({ paymentUrl, orderId: order._id.toString(), tenantId })
             } catch (error) {
                 console.log("error", error);
                 await session.abortTransaction()
@@ -114,10 +117,32 @@ export class OrderController {
             } finally {
                 await session.endSession()
             }
+
         }
 
-        res.json({ paymentUrl })
+    }
 
+    getMineOrders = async (req: Request, res: Response, next: NextFunction) => {
+
+        // Get the user id from the "req.auth" which was set in the authenticate middleware:
+        const userId = req.auth.sub
+        if (!userId) {
+            return next(createHttpError(400, "No user Id found"))
+        }
+
+        // Finding the customer by userId:
+        const customer = await customerModel.findOne({ userId })
+        if (!customer) {
+            return next(createHttpError(400, "No customer found"))
+        }
+
+        // Get the orders by customer Id:
+        const orders = await orderModel.find(
+            { customerId: customer._id },
+            { cart: 0 }
+        )
+
+        res.json(orders)
     }
 
     private calculateTotal = async (cart: CartItem[]) => {
