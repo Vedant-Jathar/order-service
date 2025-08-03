@@ -9,7 +9,7 @@ import mongoose from "mongoose";
 import createHttpError from "http-errors";
 import { razorpay } from "../payment/paymentUtil";
 import customerModel from "../customer/customerModel";
-import { Order, PaymentMode } from "./orderTypes";
+import { Order, OrderQuery, PaymentMode } from "./orderTypes";
 import { MessageBroker } from "../types/broker";
 import { Request } from "express-jwt";
 import { Customer } from "../customer/customerTypes";
@@ -130,27 +130,36 @@ export class OrderController {
     getAll = async (req: Request, res: Response, next: NextFunction) => {
 
         const { role, tenantId } = req.auth
+        const { page, limit, restaurantId } = req.query
 
-        const { restaurantId } = req.query
+        const pageInt = parseInt(page as string) || 1
+        const limitInt = parseInt(limit as string) || 6
 
         if (role === Roles.ADMIN) {
             const filters = {}
             if (restaurantId) {
                 filters["tenantId"] = restaurantId
             }
+            const totalOrders = await orderModel.countDocuments(filters)
             const orders = await orderModel.find(filters, {}, { sort: { createdAt: -1 } })
+                .skip((pageInt - 1) * limitInt)
+                .limit(limitInt)
                 .populate("customerId")
                 .lean()
                 .exec()
-
-            return res.json(orders)
+            return res.json({ orders, total: totalOrders })
         }
-        
+
         if (role === Roles.MANAGER) {
+            const totalOrders = await orderModel.countDocuments({ tenantId })
             const orders = await orderModel.find({ tenantId }, {}, { sort: { createdAt: -1 } })
-            return res.json(orders)
+                .skip((pageInt - 1) * limitInt)
+                .limit(limitInt)
+                .populate("customerId")
+                .lean()
+                .exec()
+            return res.json({ orders, total: totalOrders })
         }
-
     }
 
     getMineOrders = async (req: Request, res: Response, next: NextFunction) => {

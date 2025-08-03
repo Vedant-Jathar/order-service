@@ -18,7 +18,7 @@ export enum PaymentStatus {
     PENDING = "pending",
     PAID = "paid",
     FAILED = "failed"
-} 
+}
 
 export interface Order {
     cart: CartItem[],
@@ -34,4 +34,10 @@ export interface Order {
     paymentStatus: PaymentStatus,
     paymentId: string,
     orderStatus: OrderStatus
+}
+
+export interface OrderQuery {
+    page: string,
+    limit: string,
+    tenantId: string
 }
