@@ -115,3 +115,9 @@ export interface CartItem {
   qty?: number
   pricePerUnit?: number
 }
+
+export enum Roles {
+  ADMIN = "admin",
+  MANAGER = "manager",
+  CUSTOMER = "customer"
+}

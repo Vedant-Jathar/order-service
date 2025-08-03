@@ -1,5 +1,5 @@
 import { NextFunction, Response } from "express";
-import { cachedProduct, cachedTopping, CartItem } from "../types";
+import { cachedProduct, cachedTopping, CartItem, Roles } from "../types";
 import productCacheModel from "../productCache/productCacheModel";
 import toppingCacheModel from "../toppingCache/toppingCacheModel";
 import couponModel from "../coupon/couponModel";
@@ -123,6 +123,32 @@ export class OrderController {
                 await session.endSession()
             }
 
+        }
+
+    }
+
+    getAll = async (req: Request, res: Response, next: NextFunction) => {
+
+        const { role, tenantId } = req.auth
+
+        const { restaurantId } = req.query
+
+        if (role === Roles.ADMIN) {
+            const filters = {}
+            if (restaurantId) {
+                filters["tenantId"] = restaurantId
+            }
+            const orders = await orderModel.find(filters, {}, { sort: { createdAt: -1 } })
+                .populate("customerId")
+                .lean()
+                .exec()
+
+            return res.json(orders)
+        }
+        
+        if (role === Roles.MANAGER) {
+            const orders = await orderModel.find({ tenantId }, {}, { sort: { createdAt: -1 } })
+            return res.json(orders)
         }
 
     }
