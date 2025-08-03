@@ -8,7 +8,6 @@ import { MessageBroker } from "../types/broker";
 export class PaymentController {
     constructor(private broker: MessageBroker) {
     }
-
     webhook = async (req: Request, res: Response, next: NextFunction) => {
 
         const webhookSecret: string = config.get("webhook.secret")

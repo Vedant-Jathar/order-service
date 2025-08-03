@@ -131,7 +131,8 @@ const orderSchema = new mongoose.Schema<Order>({
     },
     customerId: {
         type: Schema.Types.ObjectId,
-        required: true
+        required: true,
+        ref: "Customer"
     },
     tenantId: {
         type: String,

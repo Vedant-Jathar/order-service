@@ -164,10 +164,12 @@ export class OrderController {
                     ...acc,
                     [curr]: 1
                 }
-            }, {})
+            }, { customerId: 1 })
         }
 
         let order: Order = await orderModel.findOne({ _id: orderId })
+            .populate("customerId")
+            .exec()
 
         if (!order) {
             return next(createHttpError(404, "Order not found"))
@@ -191,12 +193,14 @@ export class OrderController {
 
         if (fields) {
             order = await orderModel.findOne({ _id: orderId }, projection)
+                .populate("customerId")
+                .exec()
             return res.json(order)
         }
 
         res.json(order)
     }
-    
+
     private calculateTotal = async (cart: CartItem[]) => {
         // Storing the ids of the products in the cart
         const productIds = cart.map(cartItem => cartItem.product._id)
