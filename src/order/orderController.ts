@@ -9,7 +9,7 @@ import mongoose from "mongoose";
 import createHttpError from "http-errors";
 import { razorpay } from "../payment/paymentUtil";
 import customerModel from "../customer/customerModel";
-import { Order, OrderQuery, PaymentMode } from "./orderTypes";
+import { Order, OrderQuery, OrderStatus, PaymentMode } from "./orderTypes";
 import { MessageBroker } from "../types/broker";
 import { Request } from "express-jwt";
 import { Customer } from "../customer/customerTypes";
@@ -232,6 +232,32 @@ export class OrderController {
                 .exec()
             return res.json(order)
         }
+
+        res.json(order)
+    }
+
+    changeStatus = async (req: Request, res: Response, next: NextFunction) => {
+        const { role, tenantId } = req.auth
+        const { id: orderId } = req.params
+        const { status } = req.body
+        
+        const order = await orderModel.findOne({ _id: orderId })
+
+        if (!order) {
+            return next(createHttpError(400, "Order not found"))
+        }
+
+        if (role === Roles.MANAGER && tenantId !== order.tenantId) {
+            return next(createHttpError(403, "Forbidden:You are not a manager of this tenant"))
+        }
+
+        const isStatusValid = [OrderStatus.RECEIVED, OrderStatus.CONFIRMED, OrderStatus.PREPARED, OrderStatus.OUT_FOR_DELIVERY, OrderStatus.DELIVERED].includes(status)
+        if (!isStatusValid) {
+            return next(createHttpError(400, "Invalid status"))
+        }
+
+        order.orderStatus = status;
+        await order.save()
 
         res.json(order)
     }

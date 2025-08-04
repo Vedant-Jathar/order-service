@@ -17,5 +17,6 @@ router.post("/", authenticate, createOrderValidator, asyncWrapper(orderControlle
 router.get("/", authenticate, canAcces([Roles.ADMIN, Roles.MANAGER]), asyncWrapper(orderController.getAll))
 router.get("/mine", authenticate, asyncWrapper(orderController.getMineOrders))
 router.get("/:id", authenticate, asyncWrapper(orderController.getSingleOrder))
+router.patch("/change-status/:id", authenticate, canAcces([Roles.ADMIN, Roles.MANAGER]), asyncWrapper(orderController.changeStatus))
 
 export default router
