@@ -21,6 +21,7 @@ export enum PaymentStatus {
 }
 
 export interface Order {
+    _id: string,
     cart: CartItem[],
     customerId: mongoose.Types.ObjectId,
     tenantId: string,
@@ -40,4 +41,10 @@ export interface OrderQuery {
     page: string,
     limit: string,
     tenantId: string
+}
+
+export enum OrderEvents {
+    ORDER_CREATE = "ORDER_CREATE",
+    PAYMENT_STATUS_UPDATE = "PAYMENT_STATUS_UPDATE",
+    ORDER_STATUS_UPDATE = "ORDER_STATUS_UPDATE"
 }

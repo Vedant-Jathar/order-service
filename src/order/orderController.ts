@@ -9,7 +9,7 @@ import mongoose from "mongoose";
 import createHttpError from "http-errors";
 import { razorpay } from "../payment/paymentUtil";
 import customerModel from "../customer/customerModel";
-import { Order, OrderQuery, OrderStatus, PaymentMode } from "./orderTypes";
+import { Order, OrderEvents, OrderQuery, OrderStatus, PaymentMode } from "./orderTypes";
 import { MessageBroker } from "../types/broker";
 import { Request } from "express-jwt";
 import { Customer } from "../customer/customerTypes";
@@ -112,7 +112,18 @@ export class OrderController {
                 await idempotencyModel.create([{ key: idempotencyKey, response: order }], { session })
 
                 await session.commitTransaction()
-                await this.broker.sendMessage("order", JSON.stringify(order))
+
+                const brokerMessage = {
+                    "event-type": OrderEvents.ORDER_CREATE,
+                    "message": order
+                }
+
+                await this.broker.sendMessage(
+                    "order",
+                    JSON.stringify(brokerMessage),
+                    order._id.toString()
+                )
+
                 res.json({ paymentUrl, orderId: order._id.toString(), tenantId })
             } catch (error) {
                 console.log("error", error);
@@ -240,7 +251,7 @@ export class OrderController {
         const { role, tenantId } = req.auth
         const { id: orderId } = req.params
         const { status } = req.body
-        
+
         const order = await orderModel.findOne({ _id: orderId })
 
         if (!order) {

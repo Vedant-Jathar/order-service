@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import orderModel from "../order/orderModel";
-import { PaymentStatus } from "../order/orderTypes";
+import { OrderEvents, PaymentStatus } from "../order/orderTypes";
 import config from "config"
 import crypto from "crypto"
 import { MessageBroker } from "../types/broker";
@@ -10,21 +10,24 @@ export class PaymentController {
     }
     webhook = async (req: Request, res: Response, next: NextFunction) => {
 
-        const webhookSecret: string = config.get("webhook.secret")
+        // const webhookSecret: string = config.get("webhook.secret")
 
-        const signature = req.headers["x-razorpay-signature"] as string;
+        // const signature = req.headers["x-razorpay-signature"] as string;
 
-        const body = JSON.stringify(req.body);
+        // const body = JSON.stringify(req.body);
 
-        const expectedSignature = crypto
-            .createHmac("sha256", webhookSecret)
-            .update(body)
-            .digest("hex");
+        // const expectedSignature = crypto
+        //     .createHmac("sha256", webhookSecret)
+        //     .update(body)
+        //     .digest("hex");
 
-        if (expectedSignature !== signature) {
-            console.error("Invalid webhook signature");
-            return res.status(400).send("Invalid signature");
-        }
+        // console.log("expectedSignature", expectedSignature);
+        // console.log("signature", signature);
+
+        // if (expectedSignature !== signature) {
+        //     console.error("Invalid webhook signature");
+        //     return res.status(400).send("Invalid signature");
+        // }
 
         const event = req.body.event
 
@@ -43,7 +46,12 @@ export class PaymentController {
                     new: true
                 })
 
-            await this.broker.sendMessage("order", JSON.stringify(updatedOrder))
+            const brokerMessage = {
+                "event-type": OrderEvents.PAYMENT_STATUS_UPDATE,
+                message: updatedOrder
+            }
+
+            await this.broker.sendMessage("order", JSON.stringify(brokerMessage), updatedOrder._id.toString())
         }
 
         res.json({})

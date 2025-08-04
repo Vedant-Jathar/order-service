@@ -51,4 +51,4 @@ Publish a message to Kafka topic:
 ./kafka-console-producer.sh --bootstrap-server localhost:9092 --topic pricing
 
 Check messages in a topic:
-/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic order --from-beginning
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic order --from-beginning
