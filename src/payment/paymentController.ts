@@ -1,13 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import orderModel from "../order/orderModel";
 import { OrderEvents, PaymentStatus } from "../order/orderTypes";
-import config from "config"
-import crypto from "crypto"
 import { MessageBroker } from "../types/broker";
 
 export class PaymentController {
     constructor(private broker: MessageBroker) {
     }
+
     webhook = async (req: Request, res: Response, next: NextFunction) => {
 
         // const webhookSecret: string = config.get("webhook.secret")
@@ -48,10 +47,12 @@ export class PaymentController {
 
             const brokerMessage = {
                 "event-type": OrderEvents.PAYMENT_STATUS_UPDATE,
-                message: updatedOrder
+                "message": updatedOrder
             }
 
             await this.broker.sendMessage("order", JSON.stringify(brokerMessage), updatedOrder._id.toString())
+
+            console.log("WebHook hit");
         }
 
         res.json({})
