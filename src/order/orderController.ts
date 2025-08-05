@@ -270,6 +270,17 @@ export class OrderController {
         order.orderStatus = status;
         await order.save()
 
+        const brokerMessage = {
+            "event-type": OrderEvents.ORDER_STATUS_UPDATE,
+            "message": order
+        }
+        
+        await this.broker.sendMessage(
+            "order",
+            JSON.stringify(brokerMessage),
+            order._id.toString()
+        )
+
         res.json(order)
     }
 
