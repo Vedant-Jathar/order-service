@@ -6,7 +6,7 @@ let messageBroker: MessageBroker = null
 
 export function createMessageBroker() {
     if (!messageBroker) {
-        messageBroker = new KafkaMessageBroker("order-service", [config.get("kafka.broker")])
+        messageBroker = new KafkaMessageBroker("order-service", config.get("kafka.broker"))
     }
     return messageBroker
 }

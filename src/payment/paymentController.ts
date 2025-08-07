@@ -43,7 +43,9 @@ export class PaymentController {
                 },
                 {
                     new: true
-                })
+                }).populate("customerId").exec()
+
+            console.log("updatedOrder", updatedOrder);
 
             const brokerMessage = {
                 "event-type": OrderEvents.PAYMENT_STATUS_UPDATE,

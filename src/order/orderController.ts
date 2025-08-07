@@ -113,18 +113,22 @@ export class OrderController {
 
                 await session.commitTransaction()
 
+                const populatedOrder = await orderModel.findById(order._id)
+                    .populate("customerId")
+                    .exec()
+
                 const brokerMessage = {
                     "event-type": OrderEvents.ORDER_CREATE,
-                    "message": order
+                    "message": populatedOrder
                 }
 
                 await this.broker.sendMessage(
                     "order",
                     JSON.stringify(brokerMessage),
-                    order._id.toString()
+                    populatedOrder._id.toString()
                 )
 
-                res.json({ paymentUrl, orderId: order._id.toString(), tenantId })
+                res.json({ paymentUrl, orderId: populatedOrder._id.toString(), tenantId })
             } catch (error) {
                 console.log("error", error);
                 await session.abortTransaction()
@@ -252,7 +256,7 @@ export class OrderController {
         const { id: orderId } = req.params
         const { status } = req.body
 
-        const order = await orderModel.findOne({ _id: orderId })
+        const order = await orderModel.findOne({ _id: orderId }).populate("customerId").exec()
 
         if (!order) {
             return next(createHttpError(400, "Order not found"))
@@ -274,7 +278,7 @@ export class OrderController {
             "event-type": OrderEvents.ORDER_STATUS_UPDATE,
             "message": order
         }
-        
+
         await this.broker.sendMessage(
             "order",
             JSON.stringify(brokerMessage),

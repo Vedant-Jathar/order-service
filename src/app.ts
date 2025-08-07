@@ -6,14 +6,19 @@ import couponRoutes from "./coupon/couponRoutes"
 import orderRoutes from "./order/orderRoutes"
 import paymentRoutes from "./payment/paymentRoutes"
 import cors from "cors"
+import config from "config"
 
 const app = express();
 
-app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:3000"],
-    credentials: true
-}))
+const ALLOWED_DOMAINS = [config.get("frontend.clientUI"), config.get("frontend.adminUI")]
+console.log("ALLOWED_HEADERS", ALLOWED_DOMAINS);
 
+app.use(
+    cors({
+        origin: ALLOWED_DOMAINS as string[],
+        credentials: true,
+    }),
+);
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))

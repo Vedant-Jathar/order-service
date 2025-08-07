@@ -6,9 +6,16 @@ auth:
 database:
   url: mongodb+srv://vedant:vedant123@cluster0.mkzlnzg.mongodb.net/order?retryWrites=true&w=majority&appName=Cluster0
 kafka:
-  broker: localhost:9092
+  broker:
+  - localhost:9092
+  sasl:
+    username: ''
+    password: ''
 razorPay:
   id: rzp_test_rPk76iyU7IhOOC
   secret: 86hxsT54F5deCImSj3Sz9BJE
 webhook:
-  secret: 47ia@dWW3fZpG4Z
+  secret: 47ia@dWW3fZpG4Za
+frontend:
+  clientUI: http://localhost:3000
+  adminUI: http://localhost:5173
