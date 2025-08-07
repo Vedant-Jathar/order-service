@@ -130,4 +130,4 @@ dist
 .pnp.*
 
 # The folder containing the yaml files which have the env variables
-/config
+# /config
