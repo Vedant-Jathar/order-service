@@ -9,7 +9,7 @@ import mongoose from "mongoose";
 import createHttpError from "http-errors";
 import { razorpay } from "../payment/paymentUtil";
 import customerModel from "../customer/customerModel";
-import { Order, OrderEvents, OrderQuery, OrderStatus, PaymentMode } from "./orderTypes";
+import { Order, OrderEvents, OrderStatus, PaymentMode } from "./orderTypes";
 import { MessageBroker } from "../types/broker";
 import { Request } from "express-jwt";
 import { Customer } from "../customer/customerTypes";
@@ -142,7 +142,7 @@ export class OrderController {
 
     }
 
-    getAll = async (req: Request, res: Response, next: NextFunction) => {
+    getAll = async (req: Request, res: Response) => {
 
         const { role, tenantId } = req.auth
         const { page, limit, restaurantId } = req.query
