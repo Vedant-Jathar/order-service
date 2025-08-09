@@ -52,3 +52,8 @@ Publish a message to Kafka topic:
 
 Check messages in a topic:
 kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic order --from-beginning
+
+
+# kafka Confluent Key:ES2ZHIWNTUB5GKRN
+# kafka Confluent Secret:cflt2iOkzbCHTbgaPkiwN5t2SokOP5NyTP5TaG+L+e1vqj8LnEdNI9uV0drrScXA
+# kafka host: pkc-419q3.us-east4.gcp.confluent.cloud:9092
