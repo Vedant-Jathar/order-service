@@ -23,7 +23,7 @@ export class KafkaMessageBroker implements MessageBroker {
                 sasl: {
                     mechanism: "plain",
                     username: config.get("kafka.sasl.username"),
-                    password: config.get("kafka.sasl.username")
+                    password: config.get("kafka.sasl.password")
                 }
             }
         }
