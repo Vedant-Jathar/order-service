@@ -57,3 +57,7 @@ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic order --from
 # kafka Confluent Key:ES2ZHIWNTUB5GKRN
 # kafka Confluent Secret:cflt2iOkzbCHTbgaPkiwN5t2SokOP5NyTP5TaG+L+e1vqj8LnEdNI9uV0drrScXA
 # kafka host: pkc-419q3.us-east4.gcp.confluent.cloud:9092
+
+
+//TO start ArgoCd ui(which is used to connect to kubernetes and for continuous delivery)
+#  kubectl port-forward svc/argocd-server -n argocd 8080:443

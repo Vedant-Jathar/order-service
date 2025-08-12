@@ -96,7 +96,7 @@ export class OrderController {
                             sms: true,
                             email: true,
                         },
-                        callback_url: `http://localhost:3000/payment?orderId=${order._id.toString()}&restaurant=${tenantId}`,
+                        callback_url: `https://pizzify.store/payment?orderId=${order._id.toString()}&restaurant=${tenantId}`,
                         callback_method: "get",
                         notes: {
                             orderId: order._id.toString(),

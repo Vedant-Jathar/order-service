@@ -7,10 +7,10 @@ database:
   url: mongodb+srv://vedant:vedant123@cluster0.mkzlnzg.mongodb.net/order?retryWrites=true&w=majority&appName=Cluster0
 kafka:
   broker:
-  - localhost:9092
+  - pkc-p11xm.us-east-1.aws.confluent.cloud:9092
   sasl:
-    username: ''
-    password: ''
+    username: HZ3CVNFEXZPPXTO2
+    password: cfltalgGPIPV2tIWmtH4GQWHy00kmyL1lqTTnVdzyBZbEO/n5AHI1LhrTQNF9dGg
 razorPay:
   id: rzp_test_rPk76iyU7IhOOC
   secret: 86hxsT54F5deCImSj3Sz9BJE
